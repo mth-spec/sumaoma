@@ -2,6 +2,25 @@ const message = document.getElementById('message');
 const permissionBtn = document.getElementById('permissionBtn');
 const retryBtn = document.getElementById('retryBtn');
 
+// ブラウザの音声APIサポート検出
+const isSpeechRecognitionSupported = () => {
+    return !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+};
+
+const isSpeechSynthesisSupported = () => {
+    return !!window.speechSynthesis;
+};
+
+// iOSかどうかの判定
+const isIOS = () => {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent);
+};
+
+// Androidかどうかの判定
+const isAndroid = () => {
+    return /Android/.test(navigator.userAgent);
+};
+
 // 音声合成（読み上げ）用関数
 function speak(text) {
     window.speechSynthesis.cancel();
@@ -38,7 +57,11 @@ function startRecognition() {
     recognition.interimResults = false; // 確定した結果のみ受け取る
 
     recognition.onstart = () => {
-        message.innerText = "今から聞こえたことを\nそのまま読み上げます。\n何か話してね。";
+        if (isIOS()) {
+            message.innerText = "準備完了！\n\n画面下部にマイクボタンが出たら\nタップしてください。";
+        } else {
+            message.innerText = "今から聞こえたことを\nそのまま読み上げます。\n何か話してね。";
+        }
     };
 
     recognition.onresult = (event) => {
@@ -49,13 +72,61 @@ function startRecognition() {
     };
 
     recognition.onerror = (event) => {
-        message.innerText = "マイク設定を確認してください。";
-        retryBtn.style.display = 'block';
+        // iPhoneでのエラー処理
+        if (isIOS()) {
+            if (event.error === 'not-allowed' || event.error === 'network') {
+                message.innerHTML = "マイクへのアクセスが許可されていません。<br><br>" +
+                    "【iPhone設定手順】<br>" +
+                    "1. ホーム画面で「設定」を開く<br>" +
+                    "2. 「Safari」を探してタップ<br>" +
+                    "3. 「マイク」を探してタップ<br>" +
+                    "4. 「許可」に変更<br>" +
+                    "5. このページをリロードして再度お試しください";
+                
+                retryBtn.style.display = 'flex';
+                retryBtn.onclick = () => {
+                    location.reload();
+                };
+            } else {
+                message.innerText = `エラー: ${event.error}\n設定から許可してください。`;
+                retryBtn.style.display = 'flex';
+                retryBtn.onclick = () => {
+                    location.reload();
+                };
+            }
+        } else if (isAndroid()) {
+            if (event.error === 'not-allowed' || event.error === 'network') {
+                message.innerHTML = "マイクへのアクセスが許可されていません。<br><br>" +
+                    "【Android設定手順】<br>" +
+                    "1. 設定アプリを開く<br>" +
+                    "2. 「アプリと通知」または「アプリケーション」をタップ<br>" +
+                    "3. 使用しているブラウザ（Chrome等）を選択<br>" +
+                    "4. 「権限」または「パーミッション」をタップ<br>" +
+                    "5. 「マイク」を「許可」に変更<br>" +
+                    "6. このページをリロードして再度お試しください";
+                
+                retryBtn.style.display = 'flex';
+                retryBtn.onclick = () => {
+                    location.reload();
+                };
+            } else {
+                message.innerText = `エラー: ${event.error}\nマイク許可を確認してください。`;
+                retryBtn.style.display = 'flex';
+                retryBtn.onclick = () => {
+                    location.reload();
+                };
+            }
+        } else {
+            message.innerText = `エラー: ${event.error}\nマイク設定を確認してください。`;
+            retryBtn.style.display = 'flex';
+        }
     };
 
     recognition.onend = () => {
         // 再度練習するためにボタンを復活させる
-        retryBtn.style.display = 'block';
+        if (!message.innerHTML.includes('設定手順')) {
+            retryBtn.style.display = 'flex';
+        }
     };
 
     recognition.start();
