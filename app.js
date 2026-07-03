@@ -75,13 +75,16 @@ function startJanken() {
 
     recognition.onresult = (event) => {
         const input = event.results[0][0].transcript;
+        message.innerText = `認識結果: ${input}`;
+        speak(`あなたが言ったのは、${input}、ですね`);
+        
         const myHand = input.includes('グー') ? 'グー' : 
                      input.includes('チョキ') ? 'チョキ' : 
                      input.includes('パー') ? 'パー' : null;
 
         if (!myHand) {
-            message.innerText = "聞き取れませんでした。\nもう一度言ってください。";
-            speak("もう一度言ってください");
+            message.innerText = `聞き取れました: ${input}\nでも、グー、チョキ、パーのどれかで答えてください。`;
+            speak("もう一度、グー、チョキ、パーのどれかを言ってください");
             retryBtn.style.display = 'flex';
             retryBtn.innerText = "もう一回";
             retryBtn.onclick = () => {
