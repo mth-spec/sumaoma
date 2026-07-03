@@ -31,13 +31,14 @@ function speak(text) {
 
 // アプリの初期化（タップで開始）
 document.body.addEventListener('click', () => {
-    // 初回タップで音声を流して、ボタンを表示する
-    speak("スマホのオマケへようこそ。画面の許可ボタンをダブルタップしてください。");
-    permissionBtn.style.display = 'flex';
-    message.innerText = "「許可」ボタンを\nダブルタップしてください";
+    // 初回タップでゲーム開始
+    permissionBtn.style.display = 'none';
+    message.innerText = "マイク準備中...";
+    speak("スマホのオマケへようこそ。これからゲームを始めます。");
+    startRecognition();
 }, { once: true });
 
-// 許可ボタンの処理
+// 許可ボタンの処理（使わなくなるが、念のため残す）
 permissionBtn.onclick = () => {
     permissionBtn.style.display = 'none';
     message.innerText = "マイク準備中...";
@@ -57,13 +58,8 @@ function startRecognition() {
     recognition.interimResults = false; // 確定した結果のみ受け取る
 
     recognition.onstart = () => {
-        if (isIOS()) {
-            message.innerText = "準備完了！\n\n何か話しかけてください。\n\n（マイクボタンが出ない場合も\n話しかけるだけで認識します）";
-        } else if (isAndroid()) {
-            message.innerText = "準備完了！\n\n何か話しかけてください。\n\n（スマホが聞こえたことを\n読み上げます）";
-        } else {
-            message.innerText = "今から聞こえたことを\nそのまま読み上げます。\n何か話してね。";
-        }
+        message.innerText = "準備完了！何か話しかけてください。";
+        speak("スマホが聞こえたことを読み上げます。何か話してください。");
     };
 
     recognition.onresult = (event) => {
