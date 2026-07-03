@@ -2,50 +2,23 @@ const message = document.getElementById('message');
 const permissionBtn = document.getElementById('permissionBtn');
 const retryBtn = document.getElementById('retryBtn');
 
-// ブラウザの音声APIサポート検出
-const isSpeechRecognitionSupported = () => {
-    return !!(window.SpeechRecognition || window.webkitSpeechRecognition);
-};
-
-const isSpeechSynthesisSupported = () => {
-    return !!window.speechSynthesis;
-};
-
-// iOSかどうかの判定
-const isIOS = () => {
-    return /iPad|iPhone|iPod/.test(navigator.userAgent);
-};
-
-// Androidかどうかの判定
-const isAndroid = () => {
-    return /Android/.test(navigator.userAgent);
-};
-
-// 音声合成（読み上げ）用関数
-function speak(text) {
-    window.speechSynthesis.cancel();
-    const msg = new SpeechSynthesisUtterance(text);
-    msg.lang = 'ja-JP';
-    window.speechSynthesis.speak(msg);
-}
-
 // アプリの初期化（タップで開始）
 document.body.addEventListener('click', () => {
     // 初回タップでゲーム開始
     permissionBtn.style.display = 'none';
-    message.innerText = "マイク準備中...";
-    speak("スマホのオマケへようこそ。これからゲームを始めます。");
-    startRecognition();
+    message.innerText = "じゃんけん準備中...";
+    speak("じゃんけんゲームへようこそ。グー、チョキ、パーのどれかを言ってください。");
+    startJanken();
 }, { once: true });
 
 // 許可ボタンの処理（使わなくなるが、念のため残す）
 permissionBtn.onclick = () => {
     permissionBtn.style.display = 'none';
-    message.innerText = "マイク準備中...";
-    startRecognition();
+    message.innerText = "じゃんけん準備中...";
+    startJanken();
 };
 
-function startRecognition() {
+function startJanken() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
         message.innerText = "このブラウザでは音声入力が使えません。";
@@ -54,23 +27,53 @@ function startRecognition() {
 
     const recognition = new SpeechRecognition();
     recognition.lang = 'ja-JP';
-    recognition.continuous = false; // 一回ごとに終了する設定
-    recognition.interimResults = false; // 確定した結果のみ受け取る
+    recognition.continuous = false;
+    recognition.interimResults = false;
 
     recognition.onstart = () => {
-        message.innerText = "準備完了！何か話しかけてください。";
-        speak("スマホが聞こえたことを読み上げます。何か話してください。");
+        message.innerText = "じゃーんけーん…\nはい！";
+        speak("じゃんけん、ぽん！");
     };
 
     recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        message.innerText = `認識結果: ${transcript}`;
-        // 自分の声をスマホに読み上げさせる（フィードバック）
-        speak(transcript + "ですね");
+        const input = event.results[0][0].transcript;
+        const myHand = input.includes('グー') ? 'グー' : 
+                     input.includes('チョキ') ? 'チョキ' : 
+                     input.includes('パー') ? 'パー' : null;
+
+        if (!myHand) {
+            message.innerText = "聞き取れませんでした。\nもう一度言ってください。";
+            speak("もう一度言ってください");
+            retryBtn.style.display = 'flex';
+            retryBtn.innerText = "もう一回";
+            retryBtn.onclick = () => {
+                retryBtn.style.display = 'none';
+                startJanken();
+            };
+            return;
+        }
+
+        const hands = ['グー', 'チョキ', 'パー'];
+        const cpuHand = hands[Math.floor(Math.random() * 3)];
+        
+        let result = "";
+        if (myHand === cpuHand) result = "あいこです";
+        else if ((myHand === 'グー' && cpuHand === 'チョキ') || 
+                 (myHand === 'チョキ' && cpuHand === 'パー') || 
+                 (myHand === 'パー' && cpuHand === 'グー')) result = "あなたの勝ちです";
+        else result = "あなたの負けです";
+
+        message.innerText = `あなた: ${myHand}\n相手: ${cpuHand}\n結果: ${result}`;
+        speak(`あなたは${myHand}。私は${cpuHand}。${result}！`);
+        retryBtn.style.display = 'flex';
+        retryBtn.innerText = "もう一回";
+        retryBtn.onclick = () => {
+            retryBtn.style.display = 'none';
+            startJanken();
+        };
     };
 
     recognition.onerror = (event) => {
-        // iPhoneでのエラー処理
         if (isIOS()) {
             if (event.error === 'not-allowed' || event.error === 'network') {
                 message.innerHTML = "マイクへのアクセスが許可されていません。<br><br>" +
@@ -121,17 +124,8 @@ function startRecognition() {
     };
 
     recognition.onend = () => {
-        // 再度練習するためにボタンを復活させる
-        if (!message.innerHTML.includes('設定手順')) {
-            retryBtn.style.display = 'flex';
-        }
+        // 結果画面が表示されている場合は、ボタンはすでに表示済み
     };
 
     recognition.start();
 }
-
-// リトライボタンの処理
-retryBtn.onclick = () => {
-    retryBtn.style.display = 'none';
-    startRecognition();
-};
