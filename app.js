@@ -15,6 +15,11 @@ const isIOS = () => {
     return /iPad|iPhone|iPod/.test(navigator.userAgent);
 };
 
+// Androidかどうかの判定
+const isAndroid = () => {
+    return /Android/.test(navigator.userAgent);
+};
+
 document.body.addEventListener('click', () => {
     startApp();
 }, { once: true });
@@ -84,11 +89,44 @@ function startRecognition() {
         };
         
         recognition.onerror = (event) => {
-            message.innerText = `エラーが発生しました: ${event.error}`;
-            
             // iPhoneでのエラー処理
             if (isIOS()) {
-                message.innerText = "マイクへのアクセスが許可されていません。\n設定から許可してください。";
+                if (event.error === 'not-allowed' || event.error === 'network') {
+                    message.innerHTML = "マイクへのアクセスが許可されていません。<br><br>" +
+                        "【iPhone設定手順】<br>" +
+                        "1. ホーム画面で「設定」を開く<br>" +
+                        "2. 「Safari」を探してタップ<br>" +
+                        "3. 「マイク」を探してタップ<br>" +
+                        "4. 「許可」に変更<br>" +
+                        "5. このページをリロードして再度お試しください<br><br>" +
+                        "<button id='retryBtn' style='padding: 10px 20px; font-size: 1rem; margin-top: 20px;'>もう一度試す</button>";
+                    
+                    document.getElementById('retryBtn').onclick = () => {
+                        location.reload();
+                    };
+                } else {
+                    message.innerText = `エラー: ${event.error}\n設定から許可してください。`;
+                }
+            } else if (isAndroid()) {
+                if (event.error === 'not-allowed' || event.error === 'network') {
+                    message.innerHTML = "マイクへのアクセスが許可されていません。<br><br>" +
+                        "【Android設定手順】<br>" +
+                        "1. 設定アプリを開く<br>" +
+                        "2. 「アプリと通知」または「アプリケーション」をタップ<br>" +
+                        "3. 使用しているブラウザ（Chrome等）を選択<br>" +
+                        "4. 「権限」または「パーミッション」をタップ<br>" +
+                        "5. 「マイク」を「許可」に変更<br>" +
+                        "6. このページをリロードして再度お試しください<br><br>" +
+                        "<button id='retryBtn' style='padding: 10px 20px; font-size: 1rem; margin-top: 20px;'>もう一度試す</button>";
+                    
+                    document.getElementById('retryBtn').onclick = () => {
+                        location.reload();
+                    };
+                } else {
+                    message.innerText = `エラー: ${event.error}\nマイク許可を確認してください。`;
+                }
+            } else {
+                message.innerText = `エラーが発生しました: ${event.error}`;
             }
         };
         
