@@ -88,6 +88,9 @@ function startJanken() {
     };
 
     recognition.onerror = (event) => {
+        message.innerText = `エラーが発生しました: ${event.error}`;
+        speak(`エラー。${event.error}`);
+        
         if (isIOS()) {
             if (event.error === 'not-allowed' || event.error === 'network') {
                 message.innerHTML = "マイクへのアクセスが許可されていません。<br><br>" +
@@ -98,12 +101,6 @@ function startJanken() {
                     "4. 「許可」に変更<br>" +
                     "5. このページをリロードして再度お試しください";
                 
-                retryBtn.style.display = 'flex';
-                retryBtn.onclick = () => {
-                    location.reload();
-                };
-            } else {
-                message.innerText = `エラー: ${event.error}\n設定から許可してください。`;
                 retryBtn.style.display = 'flex';
                 retryBtn.onclick = () => {
                     location.reload();
@@ -124,22 +121,21 @@ function startJanken() {
                 retryBtn.onclick = () => {
                     location.reload();
                 };
-            } else {
-                message.innerText = `エラー: ${event.error}\nマイク許可を確認してください。`;
-                retryBtn.style.display = 'flex';
-                retryBtn.onclick = () => {
-                    location.reload();
-                };
             }
-        } else {
-            message.innerText = `エラー: ${event.error}\nマイク設定を確認してください。`;
-            retryBtn.style.display = 'flex';
         }
+        
+        retryBtn.style.display = 'flex';
     };
 
     recognition.onend = () => {
         // 結果画面が表示されている場合は、ボタンはすでに表示済み
     };
 
-    recognition.start();
+    try {
+        recognition.start();
+    } catch (error) {
+        message.innerText = `エラー: ${error.message}`;
+        speak(`エラーが発生しました。${error.message}`);
+        retryBtn.style.display = 'flex';
+    }
 }
