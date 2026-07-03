@@ -4,6 +4,20 @@ const retryBtn = document.getElementById('retryBtn');
 
 // アプリの初期化（タップで開始）
 document.body.addEventListener('click', () => {
+    // ブラウザのサポート確認
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        message.innerText = "お使いのブラウザでは音声入力が対応していません。\nChromeなど最新のブラウザをお試しください。";
+        speak("お使いのブラウザでは音声入力が対応していません。Chromeなど最新のブラウザをお試しください。");
+        return;
+    }
+    
+    if (!window.speechSynthesis) {
+        message.innerText = "お使いのブラウザでは音声読み上げが対応していません。\nChromeなど最新のブラウザをお試しください。";
+        speak("お使いのブラウザでは音声読み上げが対応していません。");
+        return;
+    }
+    
     // 初回タップでゲーム開始
     permissionBtn.style.display = 'none';
     message.innerText = "じゃんけん準備中...";
