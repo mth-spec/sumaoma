@@ -1,0 +1,15 @@
+body {
+    background-color: #232323; /* リッチブラック */
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-family: sans-serif;
+    text-align: center;
+}
+#message {
+    font-size: 2rem;
+    padding: 20px;
+}
