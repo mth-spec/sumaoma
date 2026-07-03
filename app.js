@@ -2,6 +2,24 @@ const message = document.getElementById('message');
 const permissionBtn = document.getElementById('permissionBtn');
 const retryBtn = document.getElementById('retryBtn');
 
+// iOSかどうかの判定
+const isIOS = () => {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent);
+};
+
+// Androidかどうかの判定
+const isAndroid = () => {
+    return /Android/.test(navigator.userAgent);
+};
+
+// 音声合成（読み上げ）用関数
+function speak(text) {
+    window.speechSynthesis.cancel();
+    const msg = new SpeechSynthesisUtterance(text);
+    msg.lang = 'ja-JP';
+    window.speechSynthesis.speak(msg);
+}
+
 // アプリの初期化（タップで開始）
 document.body.addEventListener('click', () => {
     // ブラウザのサポート確認
