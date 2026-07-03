@@ -41,7 +41,7 @@ function startApp() {
     }
 
     // 許可ボタンを表示
-    permissionBtn.style.display = 'block';
+    permissionBtn.style.display = 'flex';
     
     // 許可ボタンクリック時の処理
     permissionBtn.onclick = () => {
