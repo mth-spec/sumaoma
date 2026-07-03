@@ -58,7 +58,9 @@ function startRecognition() {
 
     recognition.onstart = () => {
         if (isIOS()) {
-            message.innerText = "準備完了！\n\n画面下部にマイクボタンが出たら\nタップしてください。";
+            message.innerText = "準備完了！\n\n何か話しかけてください。\n\n（マイクボタンが出ない場合も\n話しかけるだけで認識します）";
+        } else if (isAndroid()) {
+            message.innerText = "準備完了！\n\n何か話しかけてください。\n\n（スマホが聞こえたことを\n読み上げます）";
         } else {
             message.innerText = "今から聞こえたことを\nそのまま読み上げます。\n何か話してね。";
         }
