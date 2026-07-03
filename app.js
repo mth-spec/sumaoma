@@ -22,6 +22,9 @@ function speak(text) {
 
 // アプリの初期化（タップで開始）
 document.body.addEventListener('click', () => {
+    console.log("タップされました");
+    message.innerText = "タップされました...";
+    
     // ブラウザのサポート確認
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
@@ -36,10 +39,13 @@ document.body.addEventListener('click', () => {
         return;
     }
     
+    console.log("サポート確認完了");
     // 初回タップでゲーム開始
     permissionBtn.style.display = 'none';
     message.innerText = "じゃんけん準備中...";
+    console.log("speak関数を呼び出します");
     speak("じゃんけんゲームへようこそ。グー、チョキ、パーのどれかを言ってください。");
+    console.log("startJanken関数を呼び出します");
     startJanken();
 }, { once: true });
 
