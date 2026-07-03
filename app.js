@@ -1,5 +1,6 @@
 const message = document.getElementById('message');
 const permissionBtn = document.getElementById('permissionBtn');
+const retryBtn = document.getElementById('retryBtn');
 
 // ブラウザの音声APIサポート検出
 const isSpeechRecognitionSupported = () => {
@@ -67,7 +68,11 @@ function startRecognition() {
         recognition.maxAlternatives = 1;
         
         recognition.onstart = () => {
-            message.innerText = "スマホに耳を貸す準備完了！\n（iPhoneの場合は画面下部の「マイク」をタップしてください）";
+            if (isIOS()) {
+                message.innerText = "準備完了！\n\n画面下部にマイクボタンが出たら\nタップしてください。\n\nマイクボタンが出ない場合は、\nこのページをリロードしてから\n設定を確認してください。";
+            } else {
+                message.innerText = "スマホに耳を貸す準備完了！";
+            }
         };
         
         recognition.onresult = (event) => {
@@ -98,14 +103,18 @@ function startRecognition() {
                         "2. 「Safari」を探してタップ<br>" +
                         "3. 「マイク」を探してタップ<br>" +
                         "4. 「許可」に変更<br>" +
-                        "5. このページをリロードして再度お試しください<br><br>" +
-                        "<button id='retryBtn' style='padding: 10px 20px; font-size: 1rem; margin-top: 20px;'>もう一度試す</button>";
+                        "5. このページをリロードして再度お試しください";
                     
-                    document.getElementById('retryBtn').onclick = () => {
+                    retryBtn.style.display = 'block';
+                    retryBtn.onclick = () => {
                         location.reload();
                     };
                 } else {
                     message.innerText = `エラー: ${event.error}\n設定から許可してください。`;
+                    retryBtn.style.display = 'block';
+                    retryBtn.onclick = () => {
+                        location.reload();
+                    };
                 }
             } else if (isAndroid()) {
                 if (event.error === 'not-allowed' || event.error === 'network') {
@@ -116,17 +125,25 @@ function startRecognition() {
                         "3. 使用しているブラウザ（Chrome等）を選択<br>" +
                         "4. 「権限」または「パーミッション」をタップ<br>" +
                         "5. 「マイク」を「許可」に変更<br>" +
-                        "6. このページをリロードして再度お試しください<br><br>" +
-                        "<button id='retryBtn' style='padding: 10px 20px; font-size: 1rem; margin-top: 20px;'>もう一度試す</button>";
+                        "6. このページをリロードして再度お試しください";
                     
-                    document.getElementById('retryBtn').onclick = () => {
+                    retryBtn.style.display = 'block';
+                    retryBtn.onclick = () => {
                         location.reload();
                     };
                 } else {
                     message.innerText = `エラー: ${event.error}\nマイク許可を確認してください。`;
+                    retryBtn.style.display = 'block';
+                    retryBtn.onclick = () => {
+                        location.reload();
+                    };
                 }
             } else {
                 message.innerText = `エラーが発生しました: ${event.error}`;
+                retryBtn.style.display = 'block';
+                retryBtn.onclick = () => {
+                    location.reload();
+                };
             }
         };
         
